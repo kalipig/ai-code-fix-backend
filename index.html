@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 调试助手</title>
+  <style>
+    body { font-family: Arial; margin: 2rem; }
+    textarea { width: 100%; height: 100px; margin-bottom: 1rem; font-family: monospace; }
+    button { padding: 10px 20px; font-size: 16px; }
+    pre { background-color: #f0f0f0; padding: 1rem; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>AI 调试代码助手</h1>
+
+  <label>语言：</label>
+  <input type="text" id="language" value="python" /><br /><br />
+
+  <label>原始代码：</label><br />
+  <textarea id="code">print("Hello")</textarea><br />
+
+  <label>错误信息：</label><br />
+  <textarea id="error">SyntaxError: EOL while scanning string literal</textarea><br />
+
+  <button onclick="fixCode()">修复代码</button>
+
+  <h2>修复后的代码：</h2>
+  <pre id="result">（修复结果将显示在这里）</pre>
+
+  <script>
+    async function fixCode() {
+      const language = document.getElementById("language").value;
+      const code = document.getElementById("code").value;
+      const error = document.getElementById("error").value;
+
+      try {
+        const response = await fetch("http://127.0.0.1:8000/fix-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ language, code, error }),
+        });
+
+        if (!response.ok) {
+          const errText = await response.text();
+          throw new Error(`服务器错误 (${response.status}): ${errText}`);
+        }
+
+        const data = await response.json();
+        document.getElementById("result").textContent = data.fixed_code || "修复失败。";
+      } catch (error) {
+        document.getElementById("result").textContent = `请求失败：${error.message}`;
+      }
+    }
+  </script>
+</body>
+</html>
